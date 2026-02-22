@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="/static/protection.js"></script>
+    <script src="/static/chat.js"></script>
+</head>
+
+<body>
+
+    <div class="container admin-container fade-in">
+        <h1>User Management</h1>
+        <div
+            style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="btn-secondary" onclick="exportUsers()" title="Export all users to JSON file">
+                    📥 Export Users
+                </button>
+                <button class="btn-secondary" onclick="document.getElementById('importFile').click()"
+                    title="Import users from JSON file">
+                    📤 Import Users
+                </button>
+                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importUsers(event)">
+            </div>
+            <button class="btn-primary" onclick="openCreateModal()">+ Create New User</button>
+        </div>
+        <div id="adminMessage" class="message"></div>
+
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                <!-- Rows injected by JS -->
+            </tbody>
+        </table>
+
+        <div style="margin-top: 3rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;" class="fade-in">
+            <div
+                style="background: rgba(0,0,0,0.2); padding: 2rem; border-radius: 12px; border: 1px solid var(--glass-border);">
+                <h2>📻 Live Room Settings</h2>
+                <form id="liveSettingsForm" onsubmit="updateLiveSettings(event)">
+                    <input type="text" id="liveUrl" placeholder="Video Embed URL (e.g. YouTube/Twitch)" required>
+                    <input type="text" id="liveNextSession" placeholder="Next Session Time (e.g. Tomorrow 10 AM EST)"
+                        required>
+                    <label style="display:flex; gap:0.5rem; align-items:center; cursor: pointer;">
+                        <input type="checkbox" id="liveIsLive" style="width:auto;">
+                        <span>Currently LIVE</span>
+                    </label>
+                    <button type="submit" class="btn-primary">Update Live Settings</button>
+                </form>
+            </div>
+
+            <div
+                style="background: rgba(0,0,0,0.2); padding: 2rem; border-radius: 12px; border: 1px solid var(--glass-border);">
+                <h2>🖼️ Upload Gallery Image</h2>
+                <form id="galleryUploadForm" onsubmit="uploadGalleryImage(event)">
+                    <input type="text" id="galleryTitle" placeholder="Chart Title (e.g. Gold H4 Analysis)" required>
+                    <input type="date" id="galleryDate" required>
+                    <input type="file" id="galleryFile" accept="image/*" required
+                        style="background: rgba(0,0,0,0.3); padding:0.8rem; border: 1px solid var(--glass-border); border-radius: 8px; color: white;">
+                    <button type="submit" class="btn-primary">Upload to Gallery</button>
+                </form>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem; text-align: center;">
+            <a href="/" style="color: rgba(255,255,255,0.5); text-decoration: none;">&larr; Back to Home</a>
+        </div>
+    </div>
+
+    <!-- Create Modal -->
+    <div id="createModal" class="modal">
+        <div class="modal-content">
+            <h2>Create New User</h2>
+            <form id="createForm">
+                <input type="text" id="createUsername" placeholder="Username" required>
+                <input type="password" id="createPassword" placeholder="Password" required>
+                <div style="margin: 1rem 0; text-align: left;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" id="createHasPaid" style="width: auto;">
+                        <span>Has Paid (Full Access)</span>
+                    </label>
+                </div>
+                <select id="createRole"
+                    style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: white; border-radius: 8px; margin-bottom: 1rem;">
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                </select>
+                <button type="submit" class="btn-primary">Create Account</button>
+                <button type="button" class="toggle-btn" onclick="closeCreateModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h2>Edit User</h2>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <input type="text" id="editUser" placeholder="Username" required>
+                <input type="password" id="editPass" placeholder="New Password (optional)">
+                <input type="text" id="editRole" placeholder="Role (user/admin)" required>
+                <div style="margin: 1rem 0; text-align: left;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" id="editHasPaid" style="width: auto;">
+                        <span>Has Paid (Full Access)</span>
+                    </label>
+                </div>
+                <button type="submit" class="btn-primary">Save Changes</button>
+                <button type="button" class="toggle-btn" onclick="closeModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+    <script>
+        // Auto-load users on admin page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUsers();
+
+            // Generate today's date for gallery default
+            document.getElementById('galleryDate').valueAsDate = new Date();
+        });
+
+        async function updateLiveSettings(e) {
+            e.preventDefault();
+            const url = document.getElementById('liveUrl').value;
+            const next_session = document.getElementById('liveNextSession').value;
+            const is_live = document.getElementById('liveIsLive').checked;
+
+            try {
+                const res = await fetch('/api/admin/live', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, next_session, is_live })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showAdminMessage('Live settings updated successfully!', 'success');
+                } else {
+                    showAdminMessage('Failed to update live settings.', 'error');
+                }
+            } catch (err) {
+                showAdminMessage('Error updating settings: ' + err, 'error');
+            }
+        }
+
+        async function uploadGalleryImage(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerText = 'Uploading...';
+
+            const title = document.getElementById('galleryTitle').value;
+            const date = document.getElementById('galleryDate').value;
+            const file = document.getElementById('galleryFile').files[0];
+
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('title', title);
+            formData.append('date', date);
+
+            try {
+                const res = await fetch('/api/admin/gallery', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showAdminMessage('Gallery image uploaded!', 'success');
+                    e.target.reset();
+                    document.getElementById('galleryDate').valueAsDate = new Date();
+                } else {
+                    showAdminMessage(data.message || 'Gallery upload failed.', 'error');
+                }
+            } catch (err) {
+                showAdminMessage('Error uploading to gallery: ' + err, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Upload to Gallery';
+            }
+        }
+    </script>
+</body>
+
+</html>

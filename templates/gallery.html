@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alpha Gallery | ALPHA Trading</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="/static/protection.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #a855f7;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg: #080d1a;
+            --bg-2: #0f172a;
+            --card: rgba(255, 255, 255, 0.04);
+            --card-hover: rgba(255, 255, 255, 0.07);
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #e2e8f0;
+            --text-dim: rgba(255, 255, 255, 0.45);
+            --glow: rgba(99, 102, 241, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 20% -10%, rgba(99, 102, 241, 0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 80% 100%, rgba(168, 85, 247, 0.10) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* NAV */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            background: rgba(8, 13, 26, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-dim);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--text);
+            background: var(--card);
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .username-badge {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* LAYOUT */
+        .layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 0;
+            min-height: calc(100vh - 64px);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            border-right: 1px solid var(--border);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            position: sticky;
+            top: 64px;
+            height: calc(100vh - 64px);
+            overflow-y: auto;
+        }
+
+        .widget-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--primary);
+            margin-bottom: 1.25rem;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .sidebar-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.7rem 0.9rem;
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-dim);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav-item:hover {
+            color: var(--text);
+            background: var(--card);
+        }
+
+        .sidebar-nav-item.active {
+            color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        /* MAIN */
+        .main {
+            padding: 2.5rem;
+            overflow-y: auto;
+        }
+
+        .gallery-header-bar {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+        }
+
+        .gallery-header-bar h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.35rem;
+            color: white;
+        }
+
+        .gallery-header-bar p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+        }
+
+        /* GALLERY GRID */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .gallery-item {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .gallery-img-wrapper {
+            position: relative;
+            width: 100%;
+            padding-bottom: 70%;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .gallery-img-wrapper img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .gallery-item:hover .gallery-img-wrapper img {
+            transform: scale(1.05);
+        }
+
+        .gallery-info {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .gallery-title {
+            font-weight: 700;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .gallery-date {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        /* LIGHTBOX */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            padding: 2rem;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .lightbox-img {
+            max-width: 100%;
+            max-height: 80vh;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .lightbox-caption {
+            margin-top: 1rem;
+            color: white;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: color 0.2s;
+            padding: 10px;
+            line-height: 1;
+        }
+
+        .lightbox-close:hover {
+            color: var(--danger);
+        }
+
+        @media (max-width: 1024px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .lightbox-close {
+                top: -40px;
+                right: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <span class="nav-logo">⚡ ALPHA</span>
+        <div class="nav-links">
+            <a href="/home" class="nav-link">Dashboard</a>
+            <a href="/course" class="nav-link">📚 Course</a>
+            <a href="/journal" class="nav-link">📓 Journal</a>
+            <a href="/profile" class="nav-link">👤 Profile</a>
+            <a href="/live" class="nav-link">📻 Live</a>
+            <a href="/gallery" class="nav-link active">🖼️ Gallery</a>
+        </div>
+        <div class="nav-user">
+            <div class="avatar">{{ user.username[0]|upper }}</div>
+            <span class="username-badge">{{ user.username }}</span>
+            <a href="/logout" class="nav-link" style="color: rgba(239,68,68,0.7);">Logout</a>
+        </div>
+    </nav>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div>
+                <div class="widget-title">📌 Navigation</div>
+                <nav class="sidebar-nav">
+                    <a href="/home" class="sidebar-nav-item"><span class="icon">🏠</span> Dashboard</a>
+                    <a href="/course" class="sidebar-nav-item"><span class="icon">📚</span> Course Videos</a>
+                    <a href="/journal" class="sidebar-nav-item"><span class="icon">📓</span> My Journal</a>
+                    <a href="/profile" class="sidebar-nav-item"><span class="icon">👤</span> Profile & Referrals</a>
+                    <a href="/live" class="sidebar-nav-item"><span class="icon">📻</span> Alpha Live</a>
+                    <a href="/gallery" class="sidebar-nav-item active"><span class="icon">🖼️</span> Alpha Gallery</a>
+                    {% if user.role == 'admin' %}
+                    <a href="/admin" class="sidebar-nav-item"><span class="icon">⚙️</span> Admin Panel</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </aside>
+
+        <main class="main">
+            <div class="gallery-header-bar">
+                <h1>🖼️ The Alpha Gallery</h1>
+                <p>A repository of daily chart analysis and silent SMC blueprints.</p>
+            </div>
+
+            <div class="gallery-grid" id="galleryGrid">
+                <!-- Gallery items injected via JS -->
+                <div style="color: var(--text-dim); grid-column: 1/-1;">Loading gallery...</div>
+            </div>
+        </main>
+    </div>
+
+    <!-- LIGHTBOX -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+        <div class="lightbox-content" onclick="event.stopPropagation()">
+            <button class="lightbox-close" onclick="closeLightbox(event)">&times;</button>
+            <img src="" alt="Gallery Image" class="lightbox-img" id="lightboxImg">
+            <div class="lightbox-caption" id="lightboxCaption"></div>
+        </div>
+    </div>
+
+    <script>
+        const galleryGrid = document.getElementById('galleryGrid');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightboxImg');
+        const lightboxCaption = document.getElementById('lightboxCaption');
+
+        function loadGallery() {
+            fetch('/api/gallery')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        renderGallery(data.gallery);
+                    }
+                });
+        }
+
+        function renderGallery(gallery) {
+            if (gallery.length === 0) {
+                galleryGrid.innerHTML = '<div style="color: var(--text-dim); grid-column: 1/-1;">No images in the gallery yet.</div>';
+                return;
+            }
+
+            // Sort latest first
+            gallery.sort((a, b) => b.id - a.id);
+            const isAdmin = {{ 'true' if user.role == 'admin' else 'false'
+        }};
+
+        galleryGrid.innerHTML = '';
+        gallery.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'gallery-item';
+            div.innerHTML = `
+                <div class="gallery-img-wrapper" onclick="openLightbox('/static/uploads/${item.image}', '${escapeHTML(item.title)}', '${escapeHTML(item.date)}')">
+                    <img src="/static/uploads/${item.image}" alt="${escapeHTML(item.title)}">
+                </div>
+                <div class="gallery-info">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div>
+                            <div class="gallery-title">${escapeHTML(item.title)}</div>
+                            <div class="gallery-date">${escapeHTML(item.date)}</div>
+                        </div>
+                        ${isAdmin ? `<button class="btn-delete" style="padding: 0.2rem 0.5rem; font-size: 0.8rem; background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 4px; cursor: pointer;" onclick="deleteGalleryItem(${item.id})">Delete</button>` : ''}
+                    </div>
+                </div>
+            `;
+            galleryGrid.appendChild(div);
+        });
+    }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>'"]/g,
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag] || tag)
+            );
+        }
+
+        async function deleteGalleryItem(id) {
+            if (!confirm('Are you sure you want to delete this image?')) return;
+            try {
+                const res = await fetch(`/api/gallery/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    loadGallery();
+                } else {
+                    alert('Failed to delete image: ' + data.message);
+                }
+            } catch (err) {
+                alert('Error deleting image: ' + err);
+            }
+        }
+
+        function openLightbox(src, title, date) {
+            lightboxImg.src = src;
+            lightboxCaption.innerHTML = `${title} <span style="font-size:0.8rem; color: rgba(255,255,255,0.6); margin-left: 10px;">${date}</span>`;
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox(e) {
+            if (e) e.stopPropagation();
+            lightbox.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            // Clear src slightly after transition to avoid flicker if we had animations
+            setTimeout(() => lightboxImg.src = '', 300);
+        }
+
+        // Keyboard support to close lightbox
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+                closeLightbox();
+            }
+        });
+
+        loadGallery();
+    </script>
+</body>
+
+</html>
