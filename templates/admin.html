@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALPHA | Admin Dashboard</title>
+    <meta name="description" content="ALPHA Admin Dashboard – User & Subscription Management">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="/static/protection.js"></script>
+    <script src="/static/chat.js"></script>
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --panel: rgba(255, 255, 255, 0.03);
+            --border: rgba(160, 32, 240, 0.2);
+            --border-subtle: rgba(255, 255, 255, 0.07);
+            --primary: #A020F0;
+            --primary-dim: rgba(160, 32, 240, 0.15);
+            --primary-glow: rgba(160, 32, 240, 0.35);
+            --text: #f0f0ff;
+            --text-muted: rgba(240, 240, 255, 0.5);
+            --green: #10b981;
+            --green-dim: rgba(16, 185, 129, 0.15);
+            --red: #ef4444;
+            --red-dim: rgba(239, 68, 68, 0.15);
+            --gold: #f59e0b;
+            --gold-dim: rgba(245, 158, 11, 0.15);
+            --blue: #3b82f6;
+            --blue-dim: rgba(59, 130, 246, 0.15);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem 1.5rem 4rem;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 70% 50% at 30% -10%, rgba(160, 32, 240, 0.1) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 50% at 80% 100%, rgba(120, 0, 200, 0.08) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .page-wrap {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* ─── Header ─── */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #A020F0, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 3px;
+        }
+
+        .page-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .page-title span {
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-left: 0.5rem;
+        }
+
+        /* ─── Stats bar ─── */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--panel);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            transition: border-color 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--border);
+        }
+
+        .stat-label {
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .stat-value.purple {
+            color: var(--primary);
+        }
+
+        .stat-value.green {
+            color: var(--green);
+        }
+
+        .stat-value.gold {
+            color: var(--gold);
+        }
+
+        .stat-value.red {
+            color: var(--red);
+        }
+
+        .stat-value.blue {
+            color: var(--blue);
+        }
+
+        /* ─── Toolbar ─── */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .toolbar-left {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.65rem 1.25rem;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.25s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #A020F0, #7c3aed);
+            color: white;
+            box-shadow: 0 4px 20px rgba(160, 32, 240, 0.35);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(160, 32, 240, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.85rem;
+            font-size: 0.8rem;
+            border-radius: 7px;
+        }
+
+        .btn-edit {
+            background: rgba(59, 130, 246, 0.15);
+            color: #93c5fd;
+            border: 1px solid rgba(59, 130, 246, 0.25);
+        }
+
+        .btn-edit:hover {
+            background: rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.12);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+        }
+
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.25);
+        }
+
+        /* ─── Message ─── */
+        #adminMessage {
+            padding: 0.85rem 1.25rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        #adminMessage.success {
+            background: var(--green-dim);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+        }
+
+        #adminMessage.error {
+            background: var(--red-dim);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        /* ─── Table ─── */
+        .table-wrap {
+            background: var(--panel);
+            border: 1px solid var(--border-subtle);
+            border-radius: 18px;
+            overflow: hidden;
+            margin-bottom: 2.5rem;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.87rem;
+        }
+
+        .user-table th {
+            background: rgba(160, 32, 240, 0.08);
+            padding: 1rem 1.1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            text-align: left;
+            border-bottom: 1px solid var(--border-subtle);
+            white-space: nowrap;
+        }
+
+        .user-table td {
+            padding: 0.9rem 1.1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            vertical-align: middle;
+            color: var(--text);
+        }
+
+        .user-table tbody tr:hover {
+            background: rgba(160, 32, 240, 0.04);
+        }
+
+        .user-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* ─── Badges ─── */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .badge-active {
+            background: var(--green-dim);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .badge-expired {
+            background: var(--red-dim);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .badge-permanent {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(160, 32, 240, 0.2));
+            color: var(--gold);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+        }
+
+        .badge-free {
+            background: rgba(255, 255, 255, 0.07);
+            color: var(--text-muted);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .badge-admin {
+            background: var(--primary-dim);
+            color: #d8b4fe;
+            border: 1px solid rgba(160, 32, 240, 0.35);
+        }
+
+        .badge-rank {
+            background: rgba(168, 85, 247, 0.12);
+            color: #c4b5fd;
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        /* Days remaining pill */
+        .days-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.25rem 0.65rem;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .days-ok {
+            background: var(--green-dim);
+            color: #34d399;
+        }
+
+        .days-warn {
+            background: var(--gold-dim);
+            color: var(--gold);
+        }
+
+        .days-exp {
+            background: var(--red-dim);
+            color: #f87171;
+        }
+
+        .days-perm {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(160, 32, 240, 0.15));
+            color: var(--gold);
+        }
+
+        .days-none {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+        }
+
+        .login-count-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .login-count-badge .count {
+            background: rgba(59, 130, 246, 0.15);
+            color: #93c5fd;
+            border-radius: 6px;
+            padding: 0.2rem 0.55rem;
+            font-weight: 800;
+        }
+
+        /* ─── Action cells ─── */
+        .action-cell {
+            display: flex;
+            gap: 0.4rem;
+            white-space: nowrap;
+        }
+
+        /* ─── Modal ─── */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.visible {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #13101a;
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 2.25rem;
+            width: 100%;
+            max-width: 480px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 40px rgba(160, 32, 240, 0.15);
+            animation: slideIn 0.25s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-content h2 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 0.4rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 0.92rem;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(160, 32, 240, 0.15);
+        }
+
+        .form-control option {
+            background: #1a1025;
+        }
+
+        /* Toggle switch */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .toggle-row:hover {
+            border-color: var(--border);
+        }
+
+        .toggle-label {
+            font-size: 0.92rem;
+            font-weight: 600;
+        }
+
+        .toggle-sub {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 46px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 26px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            left: 3px;
+            top: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch input:checked+.toggle-slider {
+            background: var(--primary);
+        }
+
+        .toggle-switch input:checked+.toggle-slider::before {
+            transform: translateX(20px);
+        }
+
+        .divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.06);
+            margin: 1.25rem 0;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        /* ─── Panel grid ─── */
+        .panels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border-subtle);
+            border-radius: 18px;
+            padding: 1.75rem;
+        }
+
+        .panel h2 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .panel .form-control+.form-control,
+        .panel .form-control+label,
+        .panel label+.form-control,
+        .panel .btn-primary {
+            margin-top: 0.75rem;
+        }
+
+        .panel .form-group {
+            margin-bottom: 0.75rem;
+        }
+
+        /* ─── Back link ─── */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-top: 2.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.88rem;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--text);
+        }
+
+        /* ─── Loading skeleton ─── */
+        @keyframes shimmer {
+            0% {
+                background-position: -500px 0;
+            }
+
+            100% {
+                background-position: 500px 0;
+            }
+        }
+
+        .skeleton-row td {
+            padding: 0.9rem 1.1rem;
+        }
+
+        .skeleton-cell {
+            height: 16px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.04) 75%);
+            background-size: 500px 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .user-table {
+                font-size: 0.8rem;
+            }
+
+            .user-table th,
+            .user-table td {
+                padding: 0.7rem 0.8rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem 0.75rem 3rem;
+            }
+
+            .table-wrap {
+                overflow-x: auto;
+                border-radius: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-wrap">
+        <!-- Header -->
+        <div class="page-header">
+            <div>
+                <div class="logo">⚡ ALPHA</div>
+            </div>
+            <div>
+                <div class="page-title">Admin Dashboard <span>User & Subscription Management</span></div>
+            </div>
+        </div>
+
+        <!-- Stats bar -->
+        <div class="stats-bar" id="statsBar">
+            <div class="stat-card">
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value purple" id="statTotal">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Active Subs</div>
+                <div class="stat-value green" id="statActive">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Permanent</div>
+                <div class="stat-value gold" id="statPerm">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Expired</div>
+                <div class="stat-value red" id="statExpired">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Logins</div>
+                <div class="stat-value blue" id="statLogins">—</div>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <button class="btn btn-secondary" onclick="exportUsers()">📥 Export</button>
+                <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📤
+                    Import</button>
+                <input type="file" id="importFile" accept=".json" style="display:none" onchange="importUsers(event)">
+            </div>
+            <button class="btn btn-primary" onclick="openCreateModal()">＋ New User</button>
+        </div>
+
+        <!-- Message -->
+        <div id="adminMessage"></div>
+
+        <!-- Users Table -->
+        <div class="table-wrap">
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>#ID</th>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Rank</th>
+                        <th>Status</th>
+                        <th>Subscription</th>
+                        <th>⏳ Days Left</th>
+                        <th>🔑 Activity</th>
+                        <th>Last Login</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    <!-- JS injected -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Admin panels -->
+        <div class="panels-grid">
+            <!-- Live Room Settings -->
+            <div class="panel">
+                <h2>📻 Live Room Settings</h2>
+                <form id="liveSettingsForm" onsubmit="updateLiveSettings(event)">
+                    <div class="form-group">
+                        <label class="form-label">Video Embed URL</label>
+                        <input class="form-control" type="text" id="liveUrl" placeholder="YouTube / Twitch embed link"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Next Session</label>
+                        <input class="form-control" type="text" id="liveNextSession"
+                            placeholder="e.g. Tomorrow 10 AM EST" required>
+                    </div>
+                    <label class="toggle-row" style="margin-bottom: 0.75rem;">
+                        <div>
+                            <div class="toggle-label">🔴 Currently LIVE</div>
+                            <div class="toggle-sub">Toggle when broadcast is active</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="liveIsLive">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </label>
+                    <button type="submit" class="btn btn-primary" style="width:100%">Update Live Settings</button>
+                </form>
+            </div>
+
+            <!-- Gallery Upload -->
+            <div class="panel">
+                <h2>🖼️ Upload Gallery Image</h2>
+                <form id="galleryUploadForm" onsubmit="uploadGalleryImage(event)">
+                    <div class="form-group">
+                        <label class="form-label">Chart Title</label>
+                        <input class="form-control" type="text" id="galleryTitle" placeholder="e.g. Gold H4 Analysis"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input class="form-control" type="date" id="galleryDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Image File</label>
+                        <input class="form-control" style="padding: 0.65rem;" type="file" id="galleryFile"
+                            accept="image/*" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%">Upload to Gallery</button>
+                </form>
+            </div>
+        </div>
+
+        <a href="/home" class="back-link">← Back to Home</a>
+    </div>
+
+    <!-- ====== Create User Modal ====== -->
+    <div id="createModal" class="modal">
+        <div class="modal-content">
+            <h2>✨ Create New User</h2>
+            <form id="createForm">
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input class="form-control" type="text" id="createUsername" placeholder="Enter username" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input class="form-control" type="password" id="createPassword" placeholder="Enter password"
+                        required>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Permanent toggle -->
+                <label class="toggle-row" style="margin-bottom: 1rem;" onclick="togglePermanentCreate()">
+                    <div>
+                        <div class="toggle-label">👑 Permanent (Lifetime)</div>
+                        <div class="toggle-sub">No expiry date — always active</div>
+                    </div>
+                    <label class="toggle-switch" onclick="event.stopPropagation()">
+                        <input type="checkbox" id="createIsPermanent" onchange="togglePermanentCreate()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </label>
+
+                <div class="form-group" id="createDaysGroup">
+                    <label class="form-label">Subscription Duration (Days)</label>
+                    <input class="form-control" type="number" id="createSubDays" placeholder="e.g. 30" min="0">
+                </div>
+
+                <!-- Has Paid -->
+                <label class="toggle-row" style="margin-bottom: 1rem;">
+                    <div>
+                        <div class="toggle-label">💳 Full Access (Paid)</div>
+                        <div class="toggle-sub">Mark as paid / premium user</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="createHasPaid">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </label>
+
+                <div class="divider"></div>
+
+                <div class="form-group">
+                    <label class="form-label">Role</label>
+                    <select class="form-control" id="createRole">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Rank</label>
+                    <select class="form-control" id="createRank">
+                        <option value="Pup">🐺 Pup (New)</option>
+                        <option value="Hunter">🏹 Hunter (Intermediate)</option>
+                        <option value="Alpha Wolf">👑 Alpha Wolf (Pro)</option>
+                    </select>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">Create Account</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeCreateModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ====== Edit User Modal ====== -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h2>✏️ Edit User</h2>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input class="form-control" type="text" id="editUser" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">New Password <small style="color:var(--text-muted)">(leave blank to
+                            keep)</small></label>
+                    <input class="form-control" type="password" id="editPass" placeholder="New password (optional)">
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Permanent toggle -->
+                <label class="toggle-row" style="margin-bottom: 1rem;" onclick="togglePermanentEdit()">
+                    <div>
+                        <div class="toggle-label">👑 Permanent (Lifetime)</div>
+                        <div class="toggle-sub">No expiry — bypasses time checks</div>
+                    </div>
+                    <label class="toggle-switch" onclick="event.stopPropagation()">
+                        <input type="checkbox" id="editIsPermanent" onchange="togglePermanentEdit()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </label>
+
+                <div class="form-group" id="editDaysGroup">
+                    <label class="form-label">Add Subscription Days <small style="color:var(--text-muted)">(adds on top
+                            of existing expiry)</small></label>
+                    <input class="form-control" type="number" id="editSubDays" placeholder="e.g. 30" min="0">
+                </div>
+
+                <!-- Has Paid -->
+                <label class="toggle-row" style="margin-bottom: 1rem;">
+                    <div>
+                        <div class="toggle-label">💳 Full Access (Paid)</div>
+                        <div class="toggle-sub">Toggle premium / paid status</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="editHasPaid">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </label>
+
+                <div class="divider"></div>
+
+                <div class="form-group">
+                    <label class="form-label">Role</label>
+                    <select class="form-control" id="editRole">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Rank</label>
+                    <select class="form-control" id="editRank">
+                        <option value="Pup">🐺 Pup (New)</option>
+                        <option value="Hunter">🏹 Hunter (Intermediate)</option>
+                        <option value="Alpha Wolf">👑 Alpha Wolf (Pro)</option>
+                    </select>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUsers();
+            document.getElementById('galleryDate').valueAsDate = new Date();
+        });
+
+        function togglePermanentCreate() {
+            const perm = document.getElementById('createIsPermanent').checked;
+            document.getElementById('createDaysGroup').style.opacity = perm ? '0.4' : '1';
+            document.getElementById('createSubDays').disabled = perm;
+        }
+
+        function togglePermanentEdit() {
+            const perm = document.getElementById('editIsPermanent').checked;
+            document.getElementById('editDaysGroup').style.opacity = perm ? '0.4' : '1';
+            document.getElementById('editSubDays').disabled = perm;
+        }
+
+        async function updateLiveSettings(e) {
+            e.preventDefault();
+            const url = document.getElementById('liveUrl').value;
+            const next_session = document.getElementById('liveNextSession').value;
+            const is_live = document.getElementById('liveIsLive').checked;
+            try {
+                const res = await fetch('/api/admin/live', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, next_session, is_live })
+                });
+                const data = await res.json();
+                showAdminMessage(data.success ? 'Live settings updated!' : 'Failed to update.', data.success ? 'success' : 'error');
+            } catch (err) {
+                showAdminMessage('Error: ' + err, 'error');
+            }
+        }
+
+        async function uploadGalleryImage(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true; btn.innerText = 'Uploading…';
+            const title = document.getElementById('galleryTitle').value;
+            const date = document.getElementById('galleryDate').value;
+            const file = document.getElementById('galleryFile').files[0];
+            if (!file) { btn.disabled = false; btn.innerText = 'Upload to Gallery'; return; }
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('title', title);
+            formData.append('date', date);
+            try {
+                const res = await fetch('/api/admin/gallery', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.success) {
+                    showAdminMessage('Gallery image uploaded!', 'success');
+                    e.target.reset();
+                    document.getElementById('galleryDate').valueAsDate = new Date();
+                } else {
+                    showAdminMessage(data.message || 'Upload failed.', 'error');
+                }
+            } catch (err) {
+                showAdminMessage('Error: ' + err, 'error');
+            } finally {
+                btn.disabled = false; btn.innerText = 'Upload to Gallery';
+            }
+        }
+
+        function showAdminMessage(msg, type) {
+            const el = document.getElementById('adminMessage');
+            el.textContent = msg;
+            el.className = type;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 4000);
+        }
+    </script>
+</body>
+
+</html>
